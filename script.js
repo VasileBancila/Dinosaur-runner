@@ -1,20 +1,12 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 let oxDino = 100, oyDino = 200, sizeObj = 50;
-let boardCol = 16;
-let cactus = [], startingCactus = 2;
+let tableCol = 16;
+let obstacles = [], startingObstacles = 2;
 let intrvalTime = 0, time = 0; 
 let jumpSpeed = 0, gravity = 0.1;
 let spacePressed = false;
 let activePlayer = true;
-
-function drawLine() {
-	ctx.beginPath();
-	ctx.moveTo(0, 255);
-	ctx.lineTo(800, 255);
-	ctx.stroke();
-	ctx.closePath();
-}
 
 function drawDinosaur() {
 	let dinosaur = new Image();
@@ -27,13 +19,13 @@ function drawDinosaur() {
 	ctx.closePath();
 }
 
-function jump() {
+function jump() { //dinosaur jump function
 	if (oyDino == 200 && spacePressed) { 
-		jumpSpeed = -5;
+		jumpSpeed = -6; //
 		spacePressed = false;
   	}
   	oyDino += jumpSpeed;
-  	jumpSpeed += gravity;
+  	jumpSpeed += gravity; //  gravitational acceleration
   	if (oyDino > 200) {
     	oyDino = 200;
     	jumpSpeed = 0;
@@ -46,47 +38,55 @@ function dinoJump(ability) {
 	}
 }
 
-function drawCactus() {
-	let imgCactus = new Image();
-	imgCactus.src = "photo/cactus.png";
+function drawObstacles() {
+	let imgObstacle = new Image();
+	imgObstacle.src = "photo/obstacle.png";
 	ctx.beginPath();
-	for (let i = 0; i < cactus.length; ++i) {
-		ctx.clearRect(cactus[i].x, cactus[i].y, sizeObj, sizeObj);
-		ctx.drawImage(imgCactus, cactus[i].x, cactus[i].y, sizeObj, sizeObj);
-		if (cactus[i].x === -50) {
-			generateOrReplaceCactus(i);
+	for (let i = 0; i < obstacles.length; ++i) {
+		ctx.clearRect(obstacles[i].x, obstacles[i].y, sizeObj, sizeObj);
+		ctx.drawImage(imgObstacle, obstacles[i].x, obstacles[i].y, sizeObj, sizeObj);
+		if (obstacles[i].x <= -50) {
+			generateOrReplaceObstacles(i);
 		}
-		cactus[i].x -= 2;
-		if (checkCollision(cactus[i].x, cactus[i].y, oxDino, oyDino)) {
+		obstacles[i].x -= 2;
+		if (checkCollision(obstacles[i].x, obstacles[i].y, oxDino, oyDino)) {
 			gameOver();
 		}
 	}
 	ctx.closePath();
 }
 
-function generateOrReplaceCactus(position = -1) {
-	let random = () => Math.floor(Math.random() * boardCol);
+function generateOrReplaceObstacles(position = -1) {
+	let random = () => Math.floor(Math.random() * tableCol);
 	let x, y, overlap;
 	do {
-		x = random() + boardCol; y = 200;
+		x = random() + tableCol; y = 200;
 		x *= sizeObj; //multiply to get the real position on the canvas
 		overlap = false;
-		for (let i = 0; i < cactus.length; ++i) {
-			if (checkCollision(x, y, cactus[i].x, cactus[i].y)) {
+		for (let i = 0; i < obstacles.length; ++i) {
+			if (checkCollision(x, y, obstacles[i].x, obstacles[i].y)) {
 				overlap = true; //found an overlap
 				break;
 			}
 		}
 	} while (overlap); //repeat until there is no overlap
-	if (position === -1) { // if no position is specified, a new missile is generated
-		cactus.push({ x, y });
-	} else { //replace the cactus at the given position
-		cactus[position] = { x, y };
+	if (position === -1) { // if no position is specified, a new obstacle is generated
+		obstacles.push({ x, y });
+	} else { //replace the obstacle at the given position
+		obstacles[position] = { x, y };
 	}
 }
 
+function drawLine() {
+	ctx.beginPath();
+	ctx.moveTo(0, 255);
+	ctx.lineTo(800, 255);
+	ctx.stroke();
+	ctx.closePath();
+}
+
 function animation() {
-	drawCactus();
+	drawObstacles();
 	drawDinosaur();
 	jump();
 	window.requestAnimationFrame(animation);
@@ -105,7 +105,7 @@ function updateStats() {
 
 function gameOver() {
 	document.getElementById("gameOver").innerText = "Game over / ";
-	cactus = [];
+	obstacles = [];
 	clearInterval(gameTime);
 	activePlayer = false;
 }
@@ -114,15 +114,19 @@ function reload() { //new game
 	location.reload();
 }
 
-function startGame() {
+window.onload = function generatedGameTable () {
 	drawLine();
+	drawDinosaur();
 	document.addEventListener("keydown", function (ability) {
 		if (activePlayer) {
 			dinoJump(ability);
 		}
 	});
-	for (let i = 0; i < startingCactus; ++i) {
-		generateOrReplaceCactus();
+}
+
+function startGame() {
+	for (let i = 0; i < startingObstacles; ++i) {
+		generateOrReplaceObstacles();
 	}
 	animation();
 	gameTime = setInterval(function () {
