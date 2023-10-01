@@ -3,7 +3,7 @@ const ctx = canvas.getContext("2d");
 let oxDino = 100, oyDino = 200, sizeObj = 50;
 let tableCol = 16;
 let obstacles = [], startingObstacles = 2;
-let intrvalTime = 0, time = 0; 
+let gameTime = 0, time = 0;
 let jumpSpeed = 0, gravity = 0.1;
 let spacePressed = false;
 let activePlayer = true;
@@ -24,8 +24,8 @@ function jump() { //dinosaur jump function
 		jumpSpeed = -6; //
 		spacePressed = false;
   	}
-  	oyDino += jumpSpeed;
-  	jumpSpeed += gravity; //  gravitational acceleration
+  	oyDino += jumpSpeed; //oyDino is updated with jump speed
+  	jumpSpeed += gravity; //jump speed is updated with gravitational acceleration
   	if (oyDino > 200) {
     	oyDino = 200;
     	jumpSpeed = 0;
